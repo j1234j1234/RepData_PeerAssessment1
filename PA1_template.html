@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title>Loading and preprocessing the data</title>
+
+<script type="text/javascript">
+window.onload = function() {
+  var imgs = document.getElementsByTagName('img'), i, img;
+  for (i = 0; i < imgs.length; i++) {
+    img = imgs[i];
+    // center an image if it is the only element of its parent
+    if (img.parentElement.childElementCount === 1)
+      img.parentElement.style.textAlign = 'center';
+  }
+};
+</script>
+
+
+
+
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 13px;
+}
+
+body {
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 20px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 {
+   font-size:2.2em;
+}
+
+h2 {
+   font-size:1.8em;
+}
+
+h3 {
+   font-size:1.4em;
+}
+
+h4 {
+   font-size:1.0em;
+}
+
+h5 {
+   font-size:0.9em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre, img {
+  max-width: 100%;
+}
+pre {
+  overflow-x: auto;
+}
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code {
+  font-size: 92%;
+  border: 1px solid #ccc;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * {
+      background: transparent !important;
+      color: black !important;
+      filter:none !important;
+      -ms-filter: none !important;
+   }
+
+   body {
+      font-size:12pt;
+      max-width:100%;
+   }
+
+   a, a:visited {
+      text-decoration: underline;
+   }
+
+   hr {
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote {
+      padding-right: 1em;
+      page-break-inside: avoid;
+   }
+
+   tr, img {
+      page-break-inside: avoid;
+   }
+
+   img {
+      max-width: 100% !important;
+   }
+
+   @page :left {
+      margin: 15mm 20mm 15mm 10mm;
+   }
+
+   @page :right {
+      margin: 15mm 10mm 15mm 20mm;
+   }
+
+   p, h2, h3 {
+      orphans: 3; widows: 3;
+   }
+
+   h2, h3 {
+      page-break-after: avoid;
+   }
+}
+</style>
+
+
+
+</head>
+
+<body>
+<h2>Loading and preprocessing the data</h2>
+
+<p>I previously set the work directory but did not display the location for privacy reasons. I then loaded the activity data into R. </p>
+
+<pre><code class="r">activity  &lt;- read.csv(&quot;activity.csv&quot;)
+</code></pre>
+
+<p>The summary shows that there are 17568 observations and 3 variables in the data, which is in line with expectations. </p>
+
+<p>The summary of the date field shows that the data covers the 61-day period from the 1st of October 2012 to the 30th of November 2012. </p>
+
+<pre><code class="r">str(activity)
+</code></pre>
+
+<pre><code>## &#39;data.frame&#39;:    17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : Factor w/ 61 levels &quot;2012-10-01&quot;,&quot;2012-10-02&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
+</code></pre>
+
+<pre><code class="r">summary(as.POSIXlt(activity$date))
+</code></pre>
+
+<pre><code>##                  Min.               1st Qu.                Median 
+## &quot;2012-10-01 00:00:00&quot; &quot;2012-10-16 00:00:00&quot; &quot;2012-10-31 00:00:00&quot; 
+##                  Mean               3rd Qu.                  Max. 
+## &quot;2012-10-31 00:06:53&quot; &quot;2012-11-15 00:00:00&quot; &quot;2012-11-30 00:00:00&quot;
+</code></pre>
+
+<p>I produced two datasets summarising the steps: one with the total steps by day, and one with the average steps by 5-minute interval.  </p>
+
+<pre><code class="r">activity.daySum &lt;- sapply(split(activity, activity$date), function(x) sum(x[, c(&quot;steps&quot;)], na.rm=TRUE))
+activity.5minuteMean &lt;- sapply(split(activity, activity$interval), function(x) mean(x[, c(&quot;steps&quot;)], na.rm=TRUE))
+</code></pre>
+
+<h2>What is mean total number of steps taken per day?</h2>
+
+<p>Producing a histogram of number of steps taken each day shows some skewness in the distribution, towards lower values. From the summary statistics we can see that the mean number of steps taken per day was 9354, and the median number of steps taken over the observation period was 10400. </p>
+
+<pre><code class="r">hist(activity.daySum)
+</code></pre>
+
+<p><img src="figure/histogram-1.png" alt="plot of chunk histogram"> </p>
+
+<pre><code class="r">summary(activity.daySum)
+</code></pre>
+
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##       0    6778   10400    9354   12810   21190
+</code></pre>
+
+<h2>What is the average daily activity pattern?</h2>
+
+<p>The time series shows that the user tends to wake up around 6am, with most of their walking activity in the morning from 8-10am. There are various spikes throughout the day, with the user going to sleep around 10:30pm. On average the user takes the most steps during the 8:35am interval. </p>
+
+<pre><code class="r">plot(x=names(activity.5minuteMean), y=activity.5minuteMean,type=&quot;l&quot; 
+     , main=&quot;Average Number of Steps by 5-Minute Interval&quot;
+     , xlab = &quot;5-Minute Interval&quot;, ylab = &quot;Average Number of Steps&quot;)
+</code></pre>
+
+<p><img src="figure/timeseries-1.png" alt="plot of chunk timeseries"> </p>
+
+<pre><code class="r">which.max(activity.5minuteMean)
+</code></pre>
+
+<pre><code>## 835 
+## 104
+</code></pre>
+
+<h2>Imputing missing values</h2>
+
+<p>The presence of missing values in the data may bias the results. From the 17568 5-minute time intervals, 2304 have missing values. I have chosen to impute these missing values using the average value for the 5-minute interval and created a new dataset called activityNew. Comparing the new and old datasets shows the imputation has worked as expected.</p>
+
+<pre><code class="r">sum(is.na(activity$steps))
+</code></pre>
+
+<pre><code>## [1] 2304
+</code></pre>
+
+<pre><code class="r">meanImputed &lt;- rep.int(activity.5minuteMean, 61)
+activityNew &lt;- activity
+activityNew$steps[is.na(activityNew$steps)] &lt;- meanImputed[is.na(activityNew$steps)]
+
+head(activity)
+</code></pre>
+
+<pre><code>##   steps       date interval
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
+## 4    NA 2012-10-01       15
+## 5    NA 2012-10-01       20
+## 6    NA 2012-10-01       25
+</code></pre>
+
+<pre><code class="r">head(activityNew)
+</code></pre>
+
+<pre><code>##       steps       date interval
+## 1 1.7169811 2012-10-01        0
+## 2 0.3396226 2012-10-01        5
+## 3 0.1320755 2012-10-01       10
+## 4 0.1509434 2012-10-01       15
+## 5 0.0754717 2012-10-01       20
+## 6 2.0943396 2012-10-01       25
+</code></pre>
+
+<p>Producing a new histogram with the imputed data shows that the distribution of steps taken per day looks more like a normal distribution, with less skewness than the original histogram. In the new distribution, the mean and median steps per day are now 10770, which are both larger than the original mean of 9354 and original median of 10400. The use of imputation has probably made the results more in line with the user&#39;s actual walking activity.   </p>
+
+<pre><code class="r">activityNew.daySum &lt;- sapply(split(activityNew, activityNew$date), function(x) sum(x[, c(&quot;steps&quot;)], na.rm=TRUE))
+hist(activityNew.daySum)
+</code></pre>
+
+<p><img src="figure/newSummary-1.png" alt="plot of chunk newSummary"> </p>
+
+<pre><code class="r">summary(activityNew.daySum)
+</code></pre>
+
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##      41    9819   10770   10770   12810   21190
+</code></pre>
+
+<pre><code class="r">summary(activity.daySum)
+</code></pre>
+
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##       0    6778   10400    9354   12810   21190
+</code></pre>
+
+<h2>Are there differences in activity patterns between weekdays and         weekends?</h2>
+
+<p>I created the field &quot;daytype&quot; which stores whether each day is a weekday or weekend. Comparing the average steps by weekend/weekday in the panel plot shows that on weekdays the user usually wakes up earlier, and has less activity in the middle of the day. In contrast, on weekends, the user wakes up later and has more activity during the day. </p>
+
+<pre><code class="r">weekendFlag &lt;- (weekdays(as.POSIXlt(activityNew$date)) %in% c(&quot;Saturday&quot;, &quot;Sunday&quot;))
+recode &lt;- c(weekend = TRUE, weekday = FALSE)            
+activityNew$daytype &lt;- factor(weekendFlag, levels=recode, labels=names(recode))
+activityNew[c(1:5, 1800:1805),]
+</code></pre>
+
+<pre><code>##           steps       date interval daytype
+## 1     1.7169811 2012-10-01        0 weekday
+## 2     0.3396226 2012-10-01        5 weekday
+## 3     0.1320755 2012-10-01       10 weekday
+## 4     0.1509434 2012-10-01       15 weekday
+## 5     0.0754717 2012-10-01       20 weekday
+## 1800  0.0000000 2012-10-07      555 weekend
+## 1801  0.0000000 2012-10-07      600 weekend
+## 1802  0.0000000 2012-10-07      605 weekend
+## 1803  0.0000000 2012-10-07      610 weekend
+## 1804 34.0000000 2012-10-07      615 weekend
+## 1805 13.0000000 2012-10-07      620 weekend
+</code></pre>
+
+<pre><code class="r">weekend = subset(activityNew,daytype == &quot;weekend&quot;) 
+weekday = subset(activityNew,daytype == &quot;weekday&quot;) 
+
+weekend.5minuteMean &lt;- sapply(split(weekend, weekend$interval), function(x) mean(x[, c(&quot;steps&quot;)], na.rm=TRUE))
+weekday.5minuteMean &lt;- sapply(split(weekday, weekday$interval), function(x) mean(x[, c(&quot;steps&quot;)], na.rm=TRUE))
+
+plotdata &lt;- rbind(data.frame(interval = as.integer(names(weekend.5minuteMean)), 
+                             steps = weekend.5minuteMean, daytype = &quot;Weekend&quot;), 
+                  data.frame(interval = as.integer(names(weekday.5minuteMean)), 
+                             steps = weekday.5minuteMean, daytype = &quot;Weekday&quot;))
+
+
+library(lattice)
+xyplot(steps ~ interval | daytype, data = plotdata 
+       ,type = &quot;l&quot;, layout=c(1,2)
+       ,xlab = &quot;Interval&quot;, ylab = &quot;Number of Steps&quot;
+       , main = &quot;Average Number of Steps by interval on Weekdays/Weekends&quot;)
+</code></pre>
+
+<p><img src="figure/weekdays-1.png" alt="plot of chunk weekdays"> </p>
+
+</body>
+
+</html>
